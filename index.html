@@ -58,10 +58,6 @@
             transition: transform 0.3s ease;
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
         .summary-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -84,6 +80,37 @@
             color: var(--primary-color);
         }
 
+        /* 篩選按鈕樣式 */
+        .filter-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            border: 1px solid #ddd;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            color: #666;
+        }
+
+        .filter-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(255, 126, 103, 0.3);
+        }
+
         /* 列表樣式 */
         .transaction-list {
             list-style: none;
@@ -96,15 +123,28 @@
             align-items: center;
             padding: 15px 0;
             border-bottom: 1px solid #eee;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .item-info h3 { margin: 0; font-size: 1.1rem; }
         .item-info span { font-size: 0.85rem; color: #999; }
         .item-price { font-weight: bold; color: var(--text-color); }
+        
+        .chart-container {
+            position: relative; 
+            height: 300px; 
+            width: 100%;
+        }
 
         /* 響應式調整 */
         @media (max-width: 600px) {
             .summary-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -112,8 +152,8 @@
 
     <div class="container">
         <header>
-            <h1>🇯🇵 日本之旅回顧</h1>
-            <p class="subtitle">2025 Tokyo & Kyoto Vibe Check</p>
+            <h1>🇯🇵 日本快閃回顧</h1>
+            <p class="subtitle">2025 Tokyo Vibe Check</p>
         </header>
 
         <div class="summary-grid">
@@ -129,11 +169,23 @@
 
         <div class="card">
             <h2>💸 錢錢去哪了？ (類別分析)</h2>
-            <canvas id="expenseChart"></canvas>
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
         </div>
 
         <div class="card">
             <h2>📝 旅行足跡與帳單</h2>
+            
+            <div class="filter-container">
+                <button class="filter-btn active" onclick="filterData('all')">全部</button>
+                <button class="filter-btn" onclick="filterData('CUBE卡')">CUBE</button>
+                <button class="filter-btn" onclick="filterData('J卡')">J卡</button>
+                <button class="filter-btn" onclick="filterData('台新')">台新</button>
+                <button class="filter-btn" onclick="filterData('凱基')">凱基</button>
+                <button class="filter-btn" onclick="filterData('other')">其他</button>
+            </div>
+
             <ul class="transaction-list" id="list-container">
                 </ul>
         </div>
@@ -141,7 +193,7 @@
 
     <script>
         // ==========================================
-        // 👇 你的 2025 東京快閃之旅 Database (Updated)
+        // 👇 你的 2025 東京快閃之旅 Database
         // ==========================================
         const tripData = [
             // --- 事前準備 & 去程 ---
@@ -206,64 +258,129 @@
         ];
 
         // ==========================================
-        // 👇 下面是邏輯處理 (不用動，除非你想改功能)
+        // 👇 邏輯處理區 (篩選 + 渲染)
         // ==========================================
 
-        // 1. 計算總花費
-        const total = tripData.reduce((sum, record) => sum + record.cost, 0);
-        document.getElementById('total-spent').innerText = `$${total.toLocaleString()}`;
-        document.getElementById('total-items').innerText = tripData.length;
+        let currentChart = null; // 用來存儲目前的圖表物件
 
-        // 2. 渲染列表
-        const listContainer = document.getElementById('list-container');
-        tripData.forEach(record => {
-            const li = document.createElement('li');
-            li.className = 'transaction-item';
-            li.innerHTML = `
-                <div class="item-info">
-                    <h3>${record.icon} ${record.item}</h3>
-                    <span>${record.date} · ${record.category} <span style="color: #ff7e67; margin-left: 5px; border: 1px solid #ff7e67; padding: 0 4px; border-radius: 4px; font-size: 0.7em;">${record.note}</span></span>
-                </div>
-                <div class="item-price">$${record.cost.toLocaleString()}</div>
-            `;
-            listContainer.appendChild(li);
+        // 初始化：一開始顯示全部
+        document.addEventListener('DOMContentLoaded', () => {
+            renderView(tripData);
         });
 
-        // 3. 準備圖表數據 (依類別加總)
-        const categories = {};
-        tripData.forEach(record => {
-            if (categories[record.category]) {
-                categories[record.category] += record.cost;
+        // 核心篩選功能
+        function filterData(type) {
+            // 1. 更新按鈕樣式
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                // 檢查按鈕文字是否包含點擊的類型 (或是特殊處理 '全部')
+                const btnText = btn.innerText;
+                if (type === 'all' && btnText === '全部') btn.classList.add('active');
+                else if (type === 'other' && btnText === '其他') btn.classList.add('active');
+                else if (btnText.includes(type)) btn.classList.add('active');
+            });
+
+            // 2. 篩選資料
+            let filteredData;
+            if (type === 'all') {
+                filteredData = tripData;
+            } else if (type === 'other') {
+                // 找出不屬於那四張卡(主要關鍵字)的資料
+                const mainCards = ['CUBE', 'J卡', '台新', '凱基'];
+                filteredData = tripData.filter(item => !mainCards.some(card => item.note.includes(card)));
             } else {
-                categories[record.category] = record.cost;
+                // 找出包含特定卡名的資料
+                filteredData = tripData.filter(item => item.note.includes(type));
             }
-        });
 
-        // 4. 繪製圖表 (Chart.js)
-        const ctx = document.getElementById('expenseChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut', // 甜甜圈圖
-            data: {
-                labels: Object.keys(categories),
-                datasets: [{
-                    data: Object.values(categories),
-                    backgroundColor: [
-                        '#FFB7B2', // 粉紅
-                        '#FFDAC1', // 杏色
-                        '#E2F0CB', // 淺綠
-                        '#B5EAD7', // 薄荷
-                        '#C7CEEA'  // 淡紫
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
+            // 3. 重新渲染畫面
+            renderView(filteredData);
+        }
+
+        // 渲染畫面主程式 (清單 + 總計 + 圖表)
+        function renderView(data) {
+            // --- A. 更新總花費 ---
+            const total = data.reduce((sum, record) => sum + record.cost, 0);
+            document.getElementById('total-spent').innerText = `$${total.toLocaleString()}`;
+            document.getElementById('total-items').innerText = data.length;
+
+            // --- B. 更新清單 ---
+            const listContainer = document.getElementById('list-container');
+            listContainer.innerHTML = ''; // 清空舊資料
+            
+            if (data.length === 0) {
+                listContainer.innerHTML = '<li style="text-align:center; padding:20px; color:#999;">沒有這張卡的消費紀錄 🍃</li>';
             }
-        });
+
+            data.forEach(record => {
+                const li = document.createElement('li');
+                li.className = 'transaction-item';
+                
+                // 根據不同卡別給不同顏色標籤 (Vibe Visuals)
+                let tagColor = '#ff7e67'; // 預設紅 (台新/凱基/其他)
+                if (record.note.includes('CUBE')) tagColor = '#4a90e2'; // 藍
+                if (record.note.includes('J卡')) tagColor = '#50c878';  // 綠
+                
+                li.innerHTML = `
+                    <div class="item-info">
+                        <h3>${record.icon} ${record.item}</h3>
+                        <span>${record.date} · ${record.category} 
+                            <span style="color: ${tagColor}; margin-left: 5px; border: 1px solid ${tagColor}; padding: 1px 6px; border-radius: 4px; font-size: 0.7em;">
+                                ${record.note || '現金'}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="item-price">$${record.cost.toLocaleString()}</div>
+                `;
+                listContainer.appendChild(li);
+            });
+
+            // --- C. 更新圖表 ---
+            updateChart(data);
+        }
+
+        function updateChart(data) {
+            const categories = {};
+            data.forEach(record => {
+                categories[record.category] = (categories[record.category] || 0) + record.cost;
+            });
+
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            
+            // 如果圖表已經存在，要先銷毀才能畫新的
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            // 如果沒有數據，就不畫圖
+            if (data.length === 0) return;
+
+            currentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categories),
+                    datasets: [{
+                        data: Object.values(categories),
+                        backgroundColor: [
+                            '#FFB7B2', // 粉紅
+                            '#FFDAC1', // 杏色
+                            '#E2F0CB', // 淺綠
+                            '#B5EAD7', // 薄荷
+                            '#C7CEEA', // 淡紫
+                            '#F0E68C'  // 卡其
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
