@@ -9,13 +9,10 @@
     
     <style>
         :root {
-            --primary-color: #ff7e67; /* 日本鳥居紅 */
-            --bg-color: #f9f7f7;      /* 米白紙張感 */
+            --primary-color: #ff7e67;
+            --bg-color: #f9f7f7;
             --card-bg: #ffffff;
             --text-color: #4a4a4a;
-            --cube-color: #4a90e2;    /* CUBE卡專屬藍 */
-            --jcard-color: #50c878;   /* J卡專屬綠 */
-            --ctbc-color: #00a0a0;    /* 中信專屬青 */
         }
 
         body {
@@ -35,172 +32,157 @@
 
         header {
             text-align: center;
-            margin-bottom: 40px;
-            padding: 40px 0;
+            margin-bottom: 30px;
+            padding: 20px 0;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            margin: 0;
-            color: var(--primary-color);
+        h1 { font-size: 2.2rem; margin: 0; color: var(--primary-color); }
+        p.subtitle { font-size: 1rem; color: #888; margin-top: 5px; }
+
+        /* --- Tabs --- */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 5px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        p.subtitle {
-            font-size: 1.2rem;
+        .tab-btn {
+            padding: 10px 30px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 25px;
             color: #888;
-            margin-top: 10px;
+            font-family: inherit;
+            transition: all 0.3s;
         }
 
-        /* 卡片樣式 */
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(255, 126, 103, 0.4);
+        }
+
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+
+        /* --- Components --- */
         .card {
             background: var(--card-bg);
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* 柔和陰影 */
-            margin-bottom: 30px;
-            transition: transform 0.3s ease;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             margin-bottom: 30px;
         }
-
-        .stat-box {
-            text-align: center;
-            padding: 20px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
-        }
-
-        .stat-number {
-            display: block;
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        /* 篩選按鈕樣式 */
-        .filter-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .stat-box { text-align: center; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+        .stat-number { display: block; font-size: 2rem; font-weight: bold; color: var(--primary-color); }
+        .chart-container { position: relative; height: 300px; width: 100%; }
         
-        .filter-btn {
-            border: 1px solid #ddd;
-            background: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.9rem;
-            transition: all 0.2s;
-            color: #666;
-        }
-
-        .filter-btn:hover {
-            background: #f0f0f0;
-        }
-
-        .filter-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-            box-shadow: 0 4px 10px rgba(255, 126, 103, 0.3);
-        }
-
-        /* 列表樣式 */
-        .transaction-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .transaction-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        .filter-container { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-btn { border: 1px solid #ddd; background: white; padding: 8px 16px; border-radius: 20px; cursor: pointer; color: #666; }
+        .filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .transaction-list { list-style: none; padding: 0; }
+        .transaction-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; }
         .item-info h3 { margin: 0; font-size: 1.1rem; }
         .item-info span { font-size: 0.85rem; color: #999; }
         .item-price { font-weight: bold; color: var(--text-color); }
-        
-        .chart-container {
-            position: relative; 
-            height: 300px; 
-            width: 100%;
-        }
 
-        /* 響應式調整 */
-        @media (max-width: 600px) {
-            .summary-grid { grid-template-columns: 1fr; }
-            h1 { font-size: 2rem; }
+        /* --- Timeline (Updated for Photos & Maps) --- */
+        .timeline { position: relative; padding-left: 30px; }
+        .timeline::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 2px; background: #eee; }
+        .timeline-item { position: relative; margin-bottom: 40px; }
+        .timeline-dot { position: absolute; left: -34px; top: 0; width: 10px; height: 10px; background: var(--primary-color); border-radius: 50%; border: 4px solid #fff; box-shadow: 0 0 0 2px #eee; }
+        .timeline-date { font-size: 0.85rem; color: var(--primary-color); font-weight: bold; margin-bottom: 5px; display: block; }
+        .timeline-content { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        
+        .timeline-title-row { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; }
+        .timeline-title { margin: 0; font-size: 1.2rem; }
+        .map-link { font-size: 0.8rem; color: #4a90e2; text-decoration: none; border: 1px solid #4a90e2; padding: 2px 8px; border-radius: 12px; white-space: nowrap; margin-left: 10px;}
+        .map-link:hover { background: #4a90e2; color: white; }
+
+        .timeline-desc { color: #666; font-size: 0.95rem; line-height: 1.6; }
+        
+        /* 圖片容器：支援多張圖並排滑動 */
+        .photo-gallery { 
+            display: flex; 
+            gap: 10px; 
+            overflow-x: auto; 
+            margin-top: 15px; 
+            padding-bottom: 5px; /* 給捲軸一點空間 */
         }
+        .timeline-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            flex-shrink: 0; /* 防止圖片被壓縮 */
+        }
+        /* 如果有多張圖，稍微縮小一點寬度 */
+        .photo-gallery.multiple .timeline-img { width: 85%; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 600px) { .summary-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <h1>🇯🇵 日本快閃回顧</h1>
-            <p class="subtitle">2025 Tokyo Vibe Check</p>
+            <h1>🇯🇵 2025 Tokyo Vibe</h1>
+            <p class="subtitle">Memories & Expenses</p>
         </header>
 
-        <div class="summary-grid">
-            <div class="stat-box">
-                <span>總花費 (TWD)</span>
-                <span class="stat-number" id="total-spent">0</span>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('accounting')">💰 記帳分析</button>
+            <button class="tab-btn" onclick="switchTab('itinerary')">📸 行程回顧</button>
+        </div>
+
+        <div id="tab-accounting" class="tab-content active">
+            <div class="summary-grid">
+                <div class="stat-box"><span>總花費 (TWD)</span><span class="stat-number" id="total-spent">0</span></div>
+                <div class="stat-box"><span>紀錄筆數</span><span class="stat-number" id="total-items">0</span></div>
             </div>
-            <div class="stat-box">
-                <span>紀錄筆數</span>
-                <span class="stat-number" id="total-items">0</span>
+            <div class="card">
+                <h2>💸 消費類別分析</h2>
+                <div class="chart-container"><canvas id="expenseChart"></canvas></div>
+            </div>
+            <div class="card">
+                <h2>📝 詳細帳單</h2>
+                <div class="filter-container">
+                    <button class="filter-btn active" onclick="filterData('all')">全部</button>
+                    <button class="filter-btn" onclick="filterData('CUBE卡')">CUBE</button>
+                    <button class="filter-btn" onclick="filterData('J卡')">J卡</button>
+                    <button class="filter-btn" onclick="filterData('中信')">中信</button>
+                    <button class="filter-btn" onclick="filterData('台新')">台新</button>
+                    <button class="filter-btn" onclick="filterData('凯基')">凯基</button>
+                    <button class="filter-btn" onclick="filterData('other')">其他</button>
+                </div>
+                <ul class="transaction-list" id="list-container"></ul>
             </div>
         </div>
 
-        <div class="card">
-            <h2>💸 錢錢去哪了？ (類別分析)</h2>
-            <div class="chart-container">
-                <canvas id="expenseChart"></canvas>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>📝 旅行足跡與帳單</h2>
-            
-            <div class="filter-container">
-                <button class="filter-btn active" onclick="filterData('all')">全部</button>
-                <button class="filter-btn" onclick="filterData('CUBE卡')">CUBE</button>
-                <button class="filter-btn" onclick="filterData('J卡')">J卡</button>
-                <button class="filter-btn" onclick="filterData('中信')">中信</button>
-                <button class="filter-btn" onclick="filterData('台新')">台新</button>
-                <button class="filter-btn" onclick="filterData('凱基')">凱基</button>
-                <button class="filter-btn" onclick="filterData('other')">其他</button>
-            </div>
-
-            <ul class="transaction-list" id="list-container">
-                </ul>
+        <div id="tab-itinerary" class="tab-content">
+            <div class="timeline" id="timeline-container">
+                </div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // 👇 你的 2025 東京快閃之旅 Database (Full Version)
+        // 1. 記帳資料 (Database)
         // ==========================================
         const tripData = [
-            // --- Day 1: 11/08 (六) ---
+            // --- Day 1 ---
             { date: '2025-11-08', item: 'WaySim eSIM 網卡', cost: 269, category: '網路', icon: '📱', note: '凱基' },
             { date: '2025-11-08', item: '捷星航空來回機票', cost: 9190, category: '交通', icon: '✈️', note: 'CUBE卡' },
             { date: '2025-11-08', item: '加購託運行李', cost: 1595, category: '交通', icon: '🧳', note: 'CUBE卡' },
@@ -211,8 +193,7 @@
             { date: '2025-11-08', item: '跑步 (行程/購物)', cost: 622, category: '娛樂', icon: '🏃', note: 'CUBE卡' },
             { date: '2025-11-08', item: '晚餐：串燒', cost: 955, category: '飲食', icon: '🍢', note: 'CUBE卡' },
             { date: '2025-11-08', item: '超商咖啡 (439円)', cost: 89, category: '飲食', icon: '☕', note: '中信' },
-
-            // --- Day 2: 11/09 (日) ---
+            // --- Day 2 ---
             { date: '2025-11-09', item: '午餐：壽喜燒', cost: 2360, category: '飲食', icon: '🥘', note: 'CUBE卡' },
             { date: '2025-11-09', item: '雨傘 (質感好物)', cost: 792, category: '購物', icon: '☂️', note: 'CUBE卡' },
             { date: '2025-11-09', item: 'Uniqlo 優衣褲', cost: 1416, category: '購物', icon: '👕', note: 'CUBE卡' },
@@ -224,135 +205,200 @@
             { date: '2025-11-09', item: '演唱會門票 (15800円)', cost: 3260, category: '娛樂', icon: '🎫', note: 'J卡' },
             { date: '2025-11-09', item: '晚餐：漢堡', cost: 334, category: '飲食', icon: '🍔', note: 'CUBE卡' },
             { date: '2025-11-09', item: '機場販賣機 (160円)', cost: 32, category: '飲食', icon: '🧃', note: '中信' },
-            { date: '2025-11-09', item: '回程成田 Express (Klook)', cost: 1310, category: '交通', icon: '🚆', note: '凱基' }
+            { date: '2025-11-09', item: '回程成田 Express', cost: 1310, category: '交通', icon: '🚆', note: '凱基' }
         ];
 
         // ==========================================
-        // 👇 邏輯處理區 (篩選 + 渲染)
+        // 2. 行程與照片 (Real Data)
         // ==========================================
+        const itineraryData = [
+            {
+                time: '08:00',
+                title: '抵達日暮里轉車',
+                desc: '早安東京！轉乘 SkyLiner 前進市區。',
+                images: ['photos/001.jpg'],
+                map: 'https://www.google.com/maps/search/?api=1&query=Nippori+Station'
+            },
+            {
+                time: '09:00',
+                title: '抵達東京車站',
+                desc: '迷宮般的東京車站，人潮開始湧現。',
+                images: ['photos/002.jpg'],
+                map: 'https://www.google.com/maps/search/?api=1&query=Tokyo+Station'
+            },
+            {
+                time: '10:20',
+                title: '晨跑皇居 🏃',
+                desc: '朝聖跑者聖地，空氣很清新，在皇居外圍跑一圈心情超好！',
+                images: ['photos/003.jpg'],
+                map: 'https://www.google.com/maps/search/?api=1&query=Imperial+Palace+Tokyo'
+            },
+            {
+                time: '13:00',
+                title: '大番壽司 (Ooban Sushi)',
+                desc: '運動完補充蛋白質，新鮮的壽司大餐。',
+                images: ['photos/004.jpg'],
+                map: 'https://www.google.com/maps/search/?api=1&query=Oban+Sushi+Shinjuku'
+            },
+            {
+                time: '15:00',
+                title: 'Fuglen Tokyo ☕',
+                desc: '奧澀谷的經典，來自挪威的咖啡名店。',
+                images: ['photos/005.jpg'],
+                map: 'https://www.google.com/maps/search/?api=1&query=Fuglen+Tokyo'
+            },
+            {
+                time: '15:30',
+                title: 'CAMELBACK sandwich&espresso',
+                desc: '必吃的玉子燒三明治！外帶去公園吃剛剛好。',
+                images: ['photos/006.jpg', 'photos/007.jpg'], // 👈 這裡放了兩張圖
+                map: 'https://www.google.com/maps/search/?api=1&query=Camelback+sandwich+espresso'
+            },
+            {
+                time: '16:00',
+                title: 'SYNK： aeXIS LINE in JAPAN',
+                desc: '代代木公園演唱會，現場氣氛太嗨了！',
+                images: ['photos/008.jpg'],
+                map: 'https://www.google.com/maps/search/?api=1&query=Yoyogi+National+Gymnasium'
+            },
+            {
+                time: '21:00',
+                title: '鳥京 Torikyo',
+                desc: '演唱會後的居酒屋續攤，燒鳥配啤酒。',
+                images: ['photos/009.jpg'],
+                map: 'https://www.google.com/maps/search/?api=1&query=Torikyo+Shinjuku'
+            },
+            {
+                time: '22:00',
+                title: 'Shinjuku no kemuri',
+                desc: '新宿のけむり，煙霧繚繞的道地氛圍，為第一天畫下句點。',
+                images: ['photos/010.jpg'],
+                map: 'https://www.google.com/maps/search/?api=1&query=Shinjuku+no+kemuri'
+            }
+        ];
 
-        let currentChart = null; // 用來存儲目前的圖表物件
+        // ==========================================
+        // 3. 核心邏輯 (Updated)
+        // ==========================================
+        
+        let currentChart = null;
 
-        // 初始化：一開始顯示全部
         document.addEventListener('DOMContentLoaded', () => {
             renderView(tripData);
+            renderItinerary();
         });
 
-        // 核心篩選功能
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            const btnIndex = tabId === 'accounting' ? 0 : 1;
+            document.querySelectorAll('.tab-btn')[btnIndex].classList.add('active');
+        }
+
+        // 渲染行程 (支援多圖與地圖)
+        function renderItinerary() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = ''; // 清空舊內容
+            
+            itineraryData.forEach(event => {
+                // 處理圖片：如果是陣列就跑迴圈，單張就轉陣列
+                const images = Array.isArray(event.images) ? event.images : (event.images ? [event.images] : []);
+                let imgHtml = '';
+                
+                if (images.length > 0) {
+                    const galleryClass = images.length > 1 ? 'photo-gallery multiple' : 'photo-gallery';
+                    const imgs = images.map(src => `<img src="${src}" class="timeline-img" loading="lazy" alt="${event.title}">`).join('');
+                    imgHtml = `<div class="${galleryClass}">${imgs}</div>`;
+                }
+
+                // 處理地圖連結
+                const mapHtml = event.map ? `<a href="${event.map}" target="_blank" class="map-link">📍 地圖</a>` : '';
+                
+                const html = `
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <span class="timeline-date">${event.time}</span>
+                        <div class="timeline-content">
+                            <div class="timeline-title-row">
+                                <h3 class="timeline-title">${event.title}</h3>
+                                ${mapHtml}
+                            </div>
+                            <p class="timeline-desc">${event.desc}</p>
+                            ${imgHtml}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        // 記帳渲染 (保持原樣)
         function filterData(type) {
-            // 1. 更新按鈕樣式
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.remove('active');
-                const btnText = btn.innerText;
-                // 處理按鈕文字與篩選關鍵字的對應
-                if (type === 'all' && btnText === '全部') btn.classList.add('active');
-                else if (type === 'other' && btnText === '其他') btn.classList.add('active');
-                else if (btnText.includes(type)) btn.classList.add('active');
+                if (type === 'all' && btn.innerText === '全部') btn.classList.add('active');
+                else if (type === 'other' && btn.innerText === '其他') btn.classList.add('active');
+                else if (btn.innerText.includes(type)) btn.classList.add('active');
             });
-
-            // 2. 篩選資料
             let filteredData;
-            if (type === 'all') {
-                filteredData = tripData;
-            } else if (type === 'other') {
-                // 找出不屬於主要卡別的資料
+            if (type === 'all') filteredData = tripData;
+            else if (type === 'other') {
                 const mainCards = ['CUBE', 'J卡', '台新', '凱基', '中信'];
                 filteredData = tripData.filter(item => !mainCards.some(card => item.note.includes(card)));
             } else {
-                // 找出包含特定卡名的資料
                 filteredData = tripData.filter(item => item.note.includes(type));
             }
-
-            // 3. 重新渲染畫面
             renderView(filteredData);
         }
 
-        // 渲染畫面主程式
         function renderView(data) {
-            // --- A. 更新總花費 ---
             const total = data.reduce((sum, record) => sum + record.cost, 0);
             document.getElementById('total-spent').innerText = `$${total.toLocaleString()}`;
             document.getElementById('total-items').innerText = data.length;
-
-            // --- B. 更新清單 ---
             const listContainer = document.getElementById('list-container');
-            listContainer.innerHTML = ''; // 清空舊資料
-            
-            if (data.length === 0) {
-                listContainer.innerHTML = '<li style="text-align:center; padding:20px; color:#999;">沒有這張卡的消費紀錄 🍃</li>';
-            }
-
+            listContainer.innerHTML = '';
+            if (data.length === 0) listContainer.innerHTML = '<li style="text-align:center; padding:20px; color:#999;">無紀錄</li>';
             data.forEach(record => {
                 const li = document.createElement('li');
                 li.className = 'transaction-item';
-                
-                // 根據不同卡別給不同顏色標籤 (視覺識別)
-                let tagColor = '#999'; // 預設灰
-                let borderColor = '#ddd';
-                
-                if (record.note.includes('CUBE')) { tagColor = '#4a90e2'; borderColor = '#4a90e2'; } // 藍
-                else if (record.note.includes('J卡')) { tagColor = '#50c878'; borderColor = '#50c878'; } // 綠
-                else if (record.note.includes('台新')) { tagColor = '#e74c3c'; borderColor = '#e74c3c'; } // 紅
-                else if (record.note.includes('凱基')) { tagColor = '#f39c12'; borderColor = '#f39c12'; } // 橘
-                else if (record.note.includes('中信')) { tagColor = '#00a0a0'; borderColor = '#00a0a0'; } // 青綠
-                
+                let tagColor = '#999'; let borderColor = '#ddd';
+                if (record.note.includes('CUBE')) { tagColor = '#4a90e2'; borderColor = '#4a90e2'; }
+                else if (record.note.includes('J卡')) { tagColor = '#50c878'; borderColor = '#50c878'; }
+                else if (record.note.includes('台新')) { tagColor = '#e74c3c'; borderColor = '#e74c3c'; }
+                else if (record.note.includes('凱基')) { tagColor = '#f39c12'; borderColor = '#f39c12'; }
+                else if (record.note.includes('中信')) { tagColor = '#00a0a0'; borderColor = '#00a0a0'; }
                 li.innerHTML = `
                     <div class="item-info">
                         <h3>${record.icon} ${record.item}</h3>
                         <span>${record.date} · ${record.category} 
-                            <span style="color: ${tagColor}; margin-left: 5px; border: 1px solid ${borderColor}; padding: 1px 6px; border-radius: 4px; font-size: 0.7em;">
-                                ${record.note || '現金'}
-                            </span>
+                            <span style="color: ${tagColor}; margin-left: 5px; border: 1px solid ${borderColor}; padding: 1px 6px; border-radius: 4px; font-size: 0.7em;">${record.note}</span>
                         </span>
                     </div>
                     <div class="item-price">$${record.cost.toLocaleString()}</div>
                 `;
                 listContainer.appendChild(li);
             });
-
-            // --- C. 更新圖表 ---
             updateChart(data);
         }
 
         function updateChart(data) {
             const categories = {};
-            data.forEach(record => {
-                categories[record.category] = (categories[record.category] || 0) + record.cost;
-            });
-
+            data.forEach(record => { categories[record.category] = (categories[record.category] || 0) + record.cost; });
             const ctx = document.getElementById('expenseChart').getContext('2d');
-            
-            if (currentChart) {
-                currentChart.destroy();
-            }
-
+            if (currentChart) currentChart.destroy();
             if (data.length === 0) return;
-
             currentChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(categories),
                     datasets: [{
                         data: Object.values(categories),
-                        backgroundColor: [
-                            '#FFB7B2', // 粉紅 (飲食)
-                            '#FFDAC1', // 杏色 (娛樂)
-                            '#E2F0CB', // 淺綠 (交通)
-                            '#B5EAD7', // 薄荷 (住宿)
-                            '#C7CEEA', // 淡紫 (購物)
-                            '#F0E68C', // 卡其 (網路)
-                            '#e0e0e0'  
-                        ],
+                        backgroundColor: ['#FFB7B2', '#FFDAC1', '#E2F0CB', '#B5EAD7', '#C7CEEA', '#F0E68C', '#e0e0e0'],
                         borderWidth: 0
                     }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
         }
     </script>
