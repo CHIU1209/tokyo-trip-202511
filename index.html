@@ -86,7 +86,7 @@
         .timeline-desc { color: #666; font-size: 0.95rem; line-height: 1.6; }
         
         .photo-gallery { display: flex; gap: 10px; overflow-x: auto; margin-top: 15px; padding-bottom: 5px; }
-        /* 新增：圖片樣式調整，加入可點擊的感覺 */
+        
         .timeline-img {
             width: 100%;
             height: 200px;
@@ -97,24 +97,24 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .timeline-img:hover {
-            transform: scale(1.02); /* 微幅放大特效 */
+            transform: scale(1.02);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         .photo-gallery.multiple .timeline-img { width: 85%; }
 
-        /* --- 新增：燈箱 (Lightbox) 樣式 --- */
+        /* --- Lightbox --- */
         .lightbox {
-            display: none; /* 預設隱藏 */
+            display: none;
             position: fixed;
             z-index: 9999;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.85); /* 深色半透明背景 */
+            background-color: rgba(0,0,0,0.85);
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px); /* 背景模糊特效 */
+            backdrop-filter: blur(5px);
             animation: fadeIn 0.3s;
         }
         .lightbox.active { display: flex; }
@@ -187,7 +187,7 @@
     </div>
 
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
-        <span class="close-btn">&times;</span>
+        <span class="close-btn">×</span>
         <img class="lightbox-content" id="lightbox-img">
     </div>
 
@@ -242,7 +242,7 @@
                 time: '10:20',
                 title: '晨跑皇居 🏃',
                 desc: '朝聖跑者聖地，空氣很清新，在皇居外圍跑一圈心情超好！',
-                images: ['photos/003.jpg'],
+                images: ['photos/003.png'], // 👈 這裡改成 .png 了！
                 map: 'https://www.google.com/maps/search/?api=1&query=Imperial+Palace+Tokyo'
             },
             {
@@ -290,7 +290,7 @@
         ];
 
         // ==========================================
-        // 3. 核心邏輯 (Updated for Lightbox)
+        // 3. 核心邏輯 (Updated)
         // ==========================================
         
         let currentChart = null;
@@ -308,13 +308,13 @@
             document.querySelectorAll('.tab-btn')[btnIndex].classList.add('active');
         }
 
-        // --- 新增：燈箱控制函數 ---
+        // 燈箱控制
         function openLightbox(src) {
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = document.getElementById('lightbox-img');
             lightboxImg.src = src;
             lightbox.classList.add('active');
-            document.body.classList.add('noscroll'); // 防止背景滾動
+            document.body.classList.add('noscroll');
         }
 
         function closeLightbox() {
@@ -323,7 +323,7 @@
             document.body.classList.remove('noscroll');
         }
 
-        // 渲染行程 (更新：加入點擊事件)
+        // 渲染行程 (含燈箱 + 錯誤處理)
         function renderItinerary() {
             const container = document.getElementById('timeline-container');
             container.innerHTML = ''; 
@@ -334,7 +334,6 @@
                 
                 if (images.length > 0) {
                     const galleryClass = images.length > 1 ? 'photo-gallery multiple' : 'photo-gallery';
-                    // 在這裡加入 onclick="openLightbox(this.src)"
                     const imgs = images.map(src => `
                         <img src="${src}" 
                              class="timeline-img clickable"
